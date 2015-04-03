@@ -20,15 +20,15 @@ describe TCR do
 
   describe ".configuration" do
      it "has a default cassette location configured" do
-       TCR.configuration.cassette_library_dir.should == "fixtures/tcr_cassettes"
+       expect(TCR.configuration.cassette_library_dir).to eq("fixtures/tcr_cassettes")
      end
 
      it "has an empty list of hook ports by default" do
-       TCR.configuration.hook_tcp_ports.should == []
+       expect(TCR.configuration.hook_tcp_ports).to eq([])
      end
 
      it "defaults to erroring on read/write mismatch access" do
-       TCR.configuration.block_for_reads.should be_falsey
+       expect(TCR.configuration.block_for_reads).to be_falsey
      end
    end
 
@@ -69,7 +69,7 @@ describe TCR do
     it "disables hooks within the block" do
       TCR.configure { |c| c.hook_tcp_ports = [25] }
       TCR.turned_off do
-        TCR.configuration.hook_tcp_ports.should == []
+        expect(TCR.configuration.hook_tcp_ports).to eq([])
       end
     end
 
@@ -156,7 +156,7 @@ describe TCR do
         tcp_socket.close
       end
       cassette_contents = File.open("test.json") { |f| f.read }
-      cassette_contents.include?("220 mx.google.com ESMTP").should == true
+      expect(cassette_contents.include?("220 mx.google.com ESMTP")).to eq(true)
     end
 
     it "plays back tcp sessions without opening a real connection" do
@@ -165,7 +165,7 @@ describe TCR do
       TCR.use_cassette("spec/fixtures/google_smtp") do
         tcp_socket = TCPSocket.open("aspmx.l.google.com", 25)
         io = Net::InternetMessageIO.new(tcp_socket)
-        line = io.readline.should include("220 mx.google.com ESMTP")
+        line = expect(io.readline).to include("220 mx.google.com ESMTP")
       end
     end
 
@@ -225,19 +225,19 @@ describe TCR do
           smtp.finish
         end
         cassette_contents = File.open("test.json") { |f| f.read }
-        cassette_contents.include?("google.com ESMTP").should == true
-        cassette_contents.include?("linkedin.com ESMTP").should == true
+        expect(cassette_contents.include?("google.com ESMTP")).to eq(true)
+        expect(cassette_contents.include?("linkedin.com ESMTP")).to eq(true)
       end
 
       it "plays back multiple sessions per cassette in order" do
         TCR.use_cassette("spec/fixtures/multitest") do
           tcp_socket = TCPSocket.open("aspmx.l.google.com", 25)
           io = Net::InternetMessageIO.new(tcp_socket)
-          line = io.readline.should include("google.com ESMTP")
+          line = expect(io.readline).to include("google.com ESMTP")
 
           tcp_socket = TCPSocket.open("mta6.am0.yahoodns.net", 25)
           io = Net::InternetMessageIO.new(tcp_socket)
-          line = io.readline.should include("yahoo.com ESMTP")
+          line = expect(io.readline).to include("yahoo.com ESMTP")
         end
       end
 
